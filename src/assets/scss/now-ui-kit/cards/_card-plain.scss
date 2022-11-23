@@ -1,0 +1,16 @@
+.card-plain{
+    background: transparent;
+    box-shadow: none;
+
+    .card-body,
+    .card-header{
+        // padding-left: 5px;
+        // padding-right: 5px;
+        padding: 10px 17px;
+    }
+
+    .card-header:after{
+        width: 100%;
+        left: 0;
+    }
+}
