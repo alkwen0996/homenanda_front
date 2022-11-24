@@ -761,6 +761,9 @@ export default {
       setTimeout(() => marker.setMap(null), 400);
       setTimeout(() => marker.setMap(this.map), 800);
       setTimeout(() => marker.setMap(null), 1200);
+
+      this.allOptionCheck();
+      this.setApartInfo(e.y, e.x);
     },
     setApartInfo(lat, lng) {
       this.getApartMarkers(lng, lat);
