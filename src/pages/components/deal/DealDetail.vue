@@ -22,9 +22,10 @@
 import DetailApart from "@/pages/components/deal/DetailApart.vue";
 import DetailList from "@/pages/components/deal/DetailList.vue";
 import DetailArea from "@/pages/components/deal/DetailArea.vue";
-import { mapGetters, mapMutations } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 
 const ApartInfo = "ApartInfo";
+const memberStore = "memberStore";
 
 export default {
   name: "DealDetail",
@@ -41,7 +42,7 @@ export default {
     this.curAttHouse = this.getAttHouse;
     this.curHouseInfo = this.getHouseInfo;
     for (let i = 0; i < this.curAttHouse.length; i++) {
-      if (this.curAttHouse[i].houseName == this.curHouseInfo.houseName) {
+      if (this.curAttHouse[i] == this.curHouseInfo.houseCode) {
         this.heart = true;
         // console.log("같나??");
         // console.log(this.curAttHouse[i]);
@@ -53,15 +54,21 @@ export default {
 
   computed: {
     ...mapGetters(ApartInfo, ["getAttHouse", "getHouseInfo"]),
+    ...mapGetters(memberStore, ["checkUserInfo"]),
   },
   methods: {
-    ...mapMutations(ApartInfo, ["ADD_ATT_HOUSE", "SUB_ATT_HOUSE"]),
+    // ...mapMutations(ApartInfo, ["ADD_ATT_HOUSE", "SUB_ATT_HOUSE"]),
+    ...mapActions(ApartInfo, ["addAttHouse", "subAttHouse"]),
     clickHeart() {
       this.heart = !this.heart;
       if (this.heart) {
-        this.ADD_ATT_HOUSE(this.curHouseInfo);
+        let userId = this.checkUserInfo.userId;
+        let favoriteHouse = { houseCode: this.curHouseInfo.houseCode, userId: userId };
+        this.addAttHouse(favoriteHouse);
+        // this.ADD_ATT_HOUSE(this.curHouseInfo);
       } else {
-        this.SUB_ATT_HOUSE(this.curHouseInfo);
+        this.subAttHouse(this.curHouseInfo.houseCode);
+        // this.SUB_ATT_HOUSE(this.curHouseInfo);
       }
     },
   },
