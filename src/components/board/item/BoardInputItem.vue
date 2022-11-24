@@ -5,18 +5,21 @@
       
       <div class="mb-3">
         <label for="exampleFormControlInput1" class="form-label"><b>제목</b></label>
-        <input type="text" class="form-control form-control-lg" id="exampleFormControlInput1" :v-model="article.subject"
+        <input type="text" class="form-control form-control-lg" 
+        id="exampleFormControlInput1" 
+        v-model="article.subject"
           required placeholder="제목 입력...">
       </div>
       
       <div class="mb-5">
         <label for="exampleFormControlTextarea1" class="form-label"><b>내용</b></label>
-        <textarea class="form-control form-control-lg" id="exampleFormControlTextarea1" v-model="article.content"
+        <textarea class="form-control form-control-lg" 
+        id="exampleFormControlTextarea1" v-model="article.content"
           placeholder="내용 입력..." rows="10" max-rows="15"></textarea>
       </div>
       <hr class="my-5">
       
-      <b-button type="submit" variant="dark" class="m-1" v-if="this.type === 'register'">글작성</b-button>
+      <b-button type="submit" variant="dark" class="m-1" v-if="this.type === 'register'" >글작성</b-button>
       <b-button type="submit" variant="dark" class="m-1" v-else>글수정</b-button>
       <b-button type="reset" variant="danger" class="m-1">초기화</b-button>
       </b-form>
@@ -25,17 +28,22 @@
 </template>
 
 <script>
-import { writeArticle, modifyArticle, getArticle } from "@/api/board";
+import { modifyArticle, getArticle } from "@/api/board";
+import { mapActions, mapState } from "vuex";
+
+const memberStore = "memberStore";
+const boardStore = "boardStore";
 
 export default {
   name: "BoardInputItem",
   data() {
     return {
       article: {
-        articleno: 0,
-        userId: "",
-        subject: "",
-        content: "",
+        articleNo: 0,
+        userId: null,
+        subject: null,
+        content: null,
+        type: 'article',
       },
       isuserId: false,
     };
@@ -43,9 +51,12 @@ export default {
   props: {
     type: { type: String },
   },
+  computed: {
+    ...mapState(memberStore, ["userInfo"]),
+  },
   created() {
     if (this.type === "modify") {
-      let param = this.$route.params.articleno;
+      let param = this.$route.params.articleNo;
       getArticle(
         param,
         ({ data }) => {
@@ -63,23 +74,30 @@ export default {
     }
   },
   methods: {
-    onSubmit(event) {
+    ...mapActions(boardStore, ["writeArticle"]),
+    async onSubmit(event) {
       event.preventDefault();
+
+      this.article.userId = this.userInfo.userId;
+      console.log(this.article.userId);
+      console.log(this.article.subject);
+      console.log(this.article.type);
+      console.log(this.type);
 
       let err = true;
       let msg = "";
-      !this.article.userId && ((msg = "작성자 입력해주세요"), (err = false), this.$refs.userId.focus());
-      err && !this.article.subject && ((msg = "제목 입력해주세요"), (err = false), this.$refs.subject.focus());
-      err && !this.article.content && ((msg = "내용 입력해주세요"), (err = false), this.$refs.content.focus());
+      !this.article.userId && ((msg = "작성자 입력해주세요"), (err = false), this.article.userId.focus());
+      err && !this.article.subject && ((msg = "제목 입력해주세요"), (err = false), this.article.subject.focus());
+      err && !this.article.content && ((msg = "내용 입력해주세요"), (err = false), this.article.content.focus());
 
       if (!err) alert(msg);
       else this.type === "register" ? this.registArticle() : this.modifyArticle();
     },
     onReset(event) {
       event.preventDefault();
-      this.article.articleno = 0;
       this.article.subject = "";
       this.article.content = "";
+      this.article.type = "article";
       this.moveList();
     },
     registArticle() {
@@ -87,8 +105,9 @@ export default {
         userId: this.article.userId,
         subject: this.article.subject,
         content: this.article.content,
+        type: this.article.type,
       };
-      writeArticle(
+      this.writeArticle(
         param,
         ({ data }) => {
           let msg = "등록 처리시 문제가 발생했습니다.";
@@ -102,10 +121,12 @@ export default {
           console.log(error);
         }
       );
+
+      this.$router.push("/board");
     },
     modifyArticle() {
       let param = {
-        articleno: this.article.articleno,
+        articleNo: this.article.articleNo,
         userId: this.article.userId,
         subject: this.article.subject,
         content: this.article.content,
@@ -127,7 +148,7 @@ export default {
       );
     },
     moveList() {
-      this.$router.push({ name: "boardlist" });
+      this.$router.push("list");
     },
   },
 };

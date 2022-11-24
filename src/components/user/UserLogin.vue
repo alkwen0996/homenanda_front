@@ -1,6 +1,4 @@
 <template>
-
-
         <div class="py-5 text-center" >
         <card type="login" plain>
             
@@ -43,6 +41,8 @@ import { Card, Button, FormGroupInput } from '@/components';
 import userApi from "@/api/Login";
 
 const memberStore = "memberStore";
+const MarkInfo = "MarkInfo";
+const ApartInfo = "ApartInfo";
 
 export default {
   name: "UserLogin",
@@ -63,6 +63,8 @@ export default {
   },
   methods: {
     ...mapActions(memberStore, ["userConfirm", "getUserInfo"]),
+    ...mapActions(MarkInfo, ["getAttInfo"]),
+    ...mapActions(ApartInfo, ["getAttHouse"]),
     async confirm() {
       await this.userConfirm({
         userId: this.userId,
@@ -73,6 +75,11 @@ export default {
       if (this.isLogin) {
         await this.getUserInfo(token);
         console.log("4. confirm() userInfo :: ", this.userInfo);
+
+        console.log(this.userInfo.userId);
+        this.getAttInfo(this.userInfo.userId);
+        this.getAttHouse(this.userInfo.userId);
+
         this.$router.push('/');
       }
     },

@@ -8,32 +8,41 @@
       <b-col class="text-left">
         <b-button variant="outline-primary" @click="moveList">목록</b-button>
       </b-col>
-      <b-col class="text-right" v-if="userInfo.userId === article.userId">
-        <b-button variant="outline-info" size="sm" @click="moveModifyArticle" class="mr-2">글수정</b-button>
-        <b-button variant="outline-danger" size="sm" @click="deleteArticle">글삭제</b-button>
-      </b-col>
+
     </b-row>
-    <b-row class="mb-1">
-      <b-col>
-        <b-card
-          :header-html="`<h3>${article.articleno}.
-          ${article.subject} [${article.hit}]</h3><div><h6>${article.userId}</div><div>${article.regtime}</h6></div>`"
-          class="mb-2"
-          border-variant="dark"
-          no-body
-        >
-          <b-card-body class="text-left">
-            <div v-html="message"></div>
-          </b-card-body>
-        </b-card>
-      </b-col>
-    </b-row>
+    <hr class="my-5">
+
+    <div class="row">
+      <div class="col">
+
+        <article class="blog-post">
+          <h3 class="blog-post-title">
+            [{{ article.articleno }}] &nbsp; {{ article.subject }}
+          </h3>
+          <p class="blog-post-meta">{{ article.regtime }}&nbsp; 작성자 : {{ article.userId }}</p>
+          <hr class="my-0">
+          <hr class="my-0">
+          <h4>{{ article.content }}</h4>
+
+        </article>
+
+      </div>
+
+
+    </div>
+
+    <hr class="my-5">
+    <b-col class="text-right">
+      <b-button variant="outline-primary" @click="moveModifyArticle" class="mr-2">글수정</b-button>
+      <b-button variant="outline-primary" @click="deleteArticle" class="mr-2">글삭제</b-button>
+    </b-col>
+
   </b-container>
 </template>
 
 <script>
 // import moment from "moment";
-import { getQna } from "@/api/qna";
+// import { getQna } from "@/api/qna";
 import { mapState } from "vuex";
 
 const memberStore = "memberStore";
@@ -53,16 +62,15 @@ export default {
     },
   },
   created() {
-    let param = this.$route.params.articleno;
-    getQna(
-      param,
-      ({ data }) => {
-        this.article = data;
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
+    // let param = this.$route.params.articleno;
+    this.article = {
+      articleno: 1,
+      subject: "바보",
+      content: "안녕하세요",
+      userId: "정지은",
+      regtime: '2022.11.24 14:42',
+      hit: '1'
+    }
   },
   methods: {
     moveModifyArticle() {
@@ -92,4 +100,7 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+
+</style>
+

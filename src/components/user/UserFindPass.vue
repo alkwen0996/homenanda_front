@@ -11,17 +11,17 @@
       </div>
 
             <h4>이름</h4>
-            <fg-input class="no-border input-lg" placeholder="아이디">
+            <fg-input class="no-border input-lg" placeholder="이름" v-model="userName">
             </fg-input>
 
             <br>
             <h4>아이디</h4>
-            <fg-input class="no-border input-lg" placeholder="비밀번호">
+            <fg-input class="no-border input-lg" placeholder="아이디" v-model="userId">
             </fg-input>
 
             <template slot="raw-content">
               <div class="card-footer text-center">
-                <a href="" id="loginButton" class="btn btn-primary btn-round btn-lg" >인증메일 받기</a>
+                <button id="loginButton" class="btn btn-primary btn-round btn-lg" @click="sendPasswordMail">인증메일 받기</button>
               </div>
 
               <br>
@@ -42,7 +42,10 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 import { Card, Button, FormGroupInput } from '@/components';
+
+const memberStore = "memberStore";
 
 export default {
   name: "UserFindPass",
@@ -50,6 +53,23 @@ export default {
     Card,
     [Button.name]: Button,
     [FormGroupInput.name]: FormGroupInput
+  },
+  data() {
+    return {
+      userId: null,
+      userName: null
+    }
+  },
+  methods: {
+    ...mapActions(memberStore, ["userFindPassword"]),
+    async sendPasswordMail() { 
+      await this.userFindPassword({
+        userId: this.userId,
+        userName: this.userName
+      });
+
+      this.$router.push("/");
+    }
   },
 }
 </script>

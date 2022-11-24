@@ -31,11 +31,14 @@ const onlyAuthUser = async (to, from, next) => {
     console.log("토큰 유효성 체크하러 가자!!!!");
     await store.dispatch("memberStore/getUserInfo", token);
   }
+
   if (!checkToken || checkUserInfo === null) {
+    console.log('checkuserinfo: ' + checkUserInfo === null);
+    console.log('token: ' + checkToken);
     alert("로그인이 필요한 페이지입니다..");
     // next({ name: "login" });
     router.push({
-      name: "login"
+      name: "/user/login"
     });
   } else {
     console.log("로그인 했다!!!!!!!!!!!!!.");
@@ -82,6 +85,7 @@ export default new Router({
     {
       path: "/login",
       name: "login",
+      beforeEnter: onlyAuthUser,
       components: {
         default: Login,
         header: MainNavbar,
@@ -116,7 +120,7 @@ export default new Router({
     {
       path: "/profile",
       name: "profile",
-      beforeEnter: onlyAuthUser,
+      // beforeEnter: onlyAuthUser,
       components: {
         default: Profile,
         header: MainNavbar,

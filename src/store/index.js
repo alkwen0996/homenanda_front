@@ -2,6 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 // module import
 import boardStore from "@/store/modules/boardStore";
+import qnaStore from "@/store/modules/qnaStore";
 import memberStore from "@/store/modules/memberStore";
 import MarkInfo from "@/store/modules/MarkInfo";
 import ApartInfo from "@/store/modules/ApartInfo";
@@ -27,6 +28,7 @@ export default new Vuex.Store({
     ApartInfo,
     AroundInfo,
     DealMapInit,
+    qnaStore,
   },
 
   plugins: [

@@ -38,7 +38,7 @@
         <nav-link to="/qna"> <i class="now-ui-icons files_paper"></i> 질문게시판 </nav-link>
       </drop-down>
 
-      <drop-down tag="li" title="Login" icon="now-ui-icons users_circle-08" class="nav-item">
+      <drop-down tag="li" title="User" icon="now-ui-icons users_circle-08" class="nav-item">
         <nav-link to="/user/login" v-show="!isLogin">
           <i class="now-ui-icons users_single-02"></i>로그인
         </nav-link>
@@ -50,7 +50,7 @@
         <nav-link to="" v-show="isLogin" @click.native="onClickLogout"> <i class="now-ui-icons users_single-02"></i>로그아웃
         </nav-link>
 
-        <nav-link to="/user/mypage">
+        <nav-link to="/user/mypage" v-show="isLogin">
           <i class="now-ui-icons users_single-02"></i>마이페이지
         </nav-link>
       </drop-down>
@@ -82,6 +82,7 @@ export default {
       // this.SET_USER_INFO(null);
       // sessionStorage.removeItem("access-token");
       // if (this.$route.path != "/") this.$router.push({ name: "main" });
+      console.log(this.userInfo)
       console.log(this.userInfo.userId);
       //vuex actions에서 userLogout 실행(Backend에 저장 된 리프레시 토큰 없애기
       //+ satate에 isLogin, userInfo 정보 변경)
