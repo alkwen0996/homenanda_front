@@ -7,7 +7,9 @@
 
     <b-row>
       <b-col>
-        <b-table striped hover :items="articles" :fields="fields" @row-clicked="viewArticle"> </b-table>
+        <b-table striped hover :items="articles" :fields="fields" @row-clicked="viewArticle"> 
+
+        </b-table>
       </b-col>
     </b-row>
     <b-row class="mb-1">
@@ -37,58 +39,19 @@
 
   export default {
     name: "BoardList",
-    data() {
-      return {
-        articles: [{
-            articleno: 1,
-            subject: "바보",
-            content: "안녕하세요",
-            userId: "정지은",
-            regtime: "11111",
-            hit: "1"
-          },
-          {
-            articleno: 1,
-            subject: "바보",
-            content: "안녕하세요",
-            userId: "정지은",
-            regtime: "11111",
-            hit: "1"
-          }
-        ],
-        fields: [{
-            key: "articleno",
-            label: "글번호",
-            tdClass: "tdClass"
-          },
-          {
-            key: "subject",
-            label: "제목",
-            tdClass: "tdSubject"
-          },
-          {
-            key: "content",
-            label: "내용",
-            tdClass: "tdContent"
-          },
-          {
-            key: "userId",
-            label: "작성자",
-            tdClass: "tdClass"
-          },
-          {
-            key: "regtime",
-            label: "작성일",
-            tdClass: "tdClass"
-          },
-          {
-            key: "hit",
-            label: "조회수",
-            tdClass: "tdClass"
-          },
-        ],
-      };
-    },
+  data() {
+    return {
+      articles: [],
+      fields: [
+        { key: "articleId", label: "글번호", tdClass: "tdClass" },
+        { key: "subject", label: "제목", tdClass: "tdSubject" },
+        { key: "content", label: "내용", tdClass: "tdContent" },
+        { key: "userId", label: "작성자", tdClass: "tdClass" },
+        { key: "createdDate", label: "작성일", tdClass: "tdClass" },
+        { key: "hit", label: "조회수", tdClass: "tdClass" },
+      ],
+    };
+  },
     created() {
       let param = {
         pg: 1,
@@ -102,6 +65,7 @@
           data
         }) => {
           this.articles = data;
+          console.log(data);
         },
         (error) => {
           console.log(error);
@@ -118,7 +82,7 @@
         this.$router.push({
           name: "boarddetail",
           params: {
-            articleno: article.articleno
+            articleId: article.articleId
           },
         });
       },

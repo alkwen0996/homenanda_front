@@ -16,8 +16,8 @@
       </div>
       <hr class="my-5">
       
-      <b-button type="submit" variant="primary" class="m-1" v-if="this.type === 'register'">글작성</b-button>
-      <b-button type="submit" variant="primary" class="m-1" v-else>글수정</b-button>
+      <b-button type="submit" variant="dark" class="m-1" v-if="this.type === 'register'">글작성</b-button>
+      <b-button type="submit" variant="dark" class="m-1" v-else>글수정</b-button>
       <b-button type="reset" variant="danger" class="m-1">초기화</b-button>
       </b-form>
     </b-col>
@@ -36,7 +36,7 @@ export default {
   data() {
     return {
       article: {
-        articleNo: 0,
+        articleId: 0,
         userId: null,
         subject: null,
         content: null,
@@ -53,11 +53,11 @@ export default {
   },
   created() {
     if (this.type === "modify") {
-      let param = this.$route.params.articleNo;
+      let param = this.$route.params.articleId;
       getQna(
         param,
         ({ data }) => {
-          // this.article.articleno = data.article.articleno;
+          // this.article.articleId = data.article.articleId;
           // this.article.userId = data.article.userId;
           // this.article.subject = data.article.subject;
           // this.article.content = data.article.content;
@@ -72,6 +72,7 @@ export default {
   },
   methods: {
     ...mapActions(qnaStore, ["writeQna"]),
+
     onSubmit(event) {
       event.preventDefault();
 
@@ -88,17 +89,16 @@ export default {
       err && !this.article.content && ((msg = "내용 입력해주세요"), (err = false), this.article.content.focus());
 
       if (!err) alert(msg);
-      else this.type === "register" ? this.registArticle() : this.modifyArticle();
+      else this.type === "register" ? this.registQna() : this.modifyQna();
     },
     onReset(event) {
       event.preventDefault();
-      this.article.articleNo = 0;
       this.article.subject = "";
       this.article.content = "";
       this.article.type = "qna";
       this.moveList();
     },
-    registArticle() {
+    registQna() {
       let param = {
         userId: this.article.userId,
         subject: this.article.subject,
@@ -109,20 +109,22 @@ export default {
         param,
         ({ data }) => {
           let msg = "등록 처리시 문제가 발생했습니다.";
-          if (data === "success") {
+          if (data.message === "success") {
             msg = "등록이 완료되었습니다.";
           }
           alert(msg);
           this.moveList();
+          // this.$router.go(-1);
         },
         (error) => {
           console.log(error);
         }
       );
+
     },
     modifyQna() {
       let param = {
-        articleNo: this.article.articleNo,
+        articleId: this.article.articleId,
         userId: this.article.userId,
         subject: this.article.subject,
         content: this.article.content,
@@ -131,7 +133,7 @@ export default {
         param,
         ({ data }) => {
           let msg = "수정 처리시 문제가 발생했습니다.";
-          if (data === "success") {
+          if (data.message === "success") {
             msg = "수정이 완료되었습니다.";
           }
           alert(msg);
@@ -142,9 +144,11 @@ export default {
           console.log(error);
         }
       );
+
+      this.$router.push({ name: "qnalist" });
     },
     moveList() {
-      this.$router.push("/qna");
+      this.$router.push({ name: "qnalist" });
     },
   },
 };

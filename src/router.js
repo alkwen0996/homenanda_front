@@ -165,7 +165,7 @@ export default new Router({
           component: () => import("@/components/board/BoardWrite"),
         },
         {
-          path: "detail/:articleno",
+          path: "detail/:articleId",
           name: "boarddetail",
           // beforeEnter: onlyAuthUser,
           component: () => import("@/components/board/BoardDetail"),
@@ -177,7 +177,7 @@ export default new Router({
           component: () => import("@/components/board/BoardModify"),
         },
         {
-          path: "delete/:articleno",
+          path: "delete/:articleId",
           name: "boarddelete",
           // beforeEnter: onlyAuthUser,
           component: () => import("@/components/board/BoardDelete"),
@@ -214,7 +214,7 @@ export default new Router({
           component: () => import("@/components/qna/QnaWrite"),
         },
         {
-          path: "detail/:articleno",
+          path: "detail/:articleId",
           name: "qnadetail",
           // beforeEnter: onlyAuthUser,
           component: () => import("@/components/qna/QnaDetail"),
@@ -226,7 +226,7 @@ export default new Router({
           component: () => import("@/components/qna/QnaModify"),
         },
         {
-          path: "delete/:articleno",
+          path: "delete/:articleId",
           name: "qnadelete",
           // beforeEnter: onlyAuthUser,
           component: () => import("@/components/qna/QnaDelete"),

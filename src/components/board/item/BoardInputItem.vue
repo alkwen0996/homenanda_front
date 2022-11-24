@@ -39,7 +39,7 @@ export default {
   data() {
     return {
       article: {
-        articleNo: 0,
+        articleId: 0,
         userId: null,
         subject: null,
         content: null,
@@ -55,12 +55,12 @@ export default {
     ...mapState(memberStore, ["userInfo"]),
   },
   created() {
-    if (this.type === "modify") {
-      let param = this.$route.params.articleNo;
+    // if (this.type === "modify") {
+      let param = this.$route.params.articleId;
       getArticle(
         param,
         ({ data }) => {
-          // this.article.articleno = data.article.articleno;
+          // this.article.articleId = data.article.articleId;
           // this.article.userId = data.article.userId;
           // this.article.subject = data.article.subject;
           // this.article.content = data.article.content;
@@ -71,7 +71,8 @@ export default {
         }
       );
       this.isuserId = true;
-    }
+    // }
+    
   },
   methods: {
     ...mapActions(boardStore, ["writeArticle"]),
@@ -122,11 +123,11 @@ export default {
         }
       );
 
-      this.$router.push("/board");
+      this.$router.push({name: "boardlist" });
     },
     modifyArticle() {
       let param = {
-        articleNo: this.article.articleNo,
+        articleId: this.article.articleId,
         userId: this.article.userId,
         subject: this.article.subject,
         content: this.article.content,
@@ -135,7 +136,7 @@ export default {
         param,
         ({ data }) => {
           let msg = "수정 처리시 문제가 발생했습니다.";
-          if (data === "success") {
+          if (data.message === "success") {
             msg = "수정이 완료되었습니다.";
           }
           alert(msg);
@@ -146,9 +147,11 @@ export default {
           console.log(error);
         }
       );
+
+      this.$router.push({ name: "boardlist" });
     },
     moveList() {
-      this.$router.push("list");
+      this.$router.push({ name: "boardlist" });
     },
   },
 };

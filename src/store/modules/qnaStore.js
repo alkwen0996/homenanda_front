@@ -47,6 +47,7 @@ const qnaStore = {
           } else {
             console.log("글작성 실패");
           }
+          return "success"
         },
         (error) => {
           console.log(error);

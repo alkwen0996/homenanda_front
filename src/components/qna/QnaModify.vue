@@ -4,7 +4,7 @@
       <img class="d-block mx-auto mb-4" src="img/qna.png" style="width:120px; height:120px">
       <h1><b>질문게시판</b></h1>
     </div>
-    <board-input-item type="modify" />
+    <qna-input-item type="modify" />
   </b-container>
 </template>
 

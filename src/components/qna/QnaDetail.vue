@@ -17,9 +17,9 @@
 
         <article class="blog-post">
           <h3 class="blog-post-title">
-            [{{ article.articleno }}] &nbsp; {{ article.subject }}
+            [{{ article.articleId }}] &nbsp; {{ article.subject }}
           </h3>
-          <p class="blog-post-meta">{{ article.regtime }}&nbsp; 작성자 : {{ article.userId }}</p>
+          <p class="blog-post-meta">{{ article.createdDate }}&nbsp; 작성자 : {{ article.userId }}</p>
           <hr class="my-0">
           <hr class="my-0">
           <h4>{{ article.content }}</h4>
@@ -42,7 +42,7 @@
 
 <script>
 // import moment from "moment";
-// import { getQna } from "@/api/qna";
+import { getQna } from "@/api/qna";
 import { mapState } from "vuex";
 
 const memberStore = "memberStore";
@@ -62,29 +62,31 @@ export default {
     },
   },
   created() {
-    // let param = this.$route.params.articleno;
-    this.article = {
-      articleno: 1,
-      subject: "바보",
-      content: "안녕하세요",
-      userId: "정지은",
-      regtime: '2022.11.24 14:42',
-      hit: '1'
-    }
+    let param = this.$route.params.articleId;
+    getQna(
+      param,
+      ({ data }) => {
+        this.article = data;
+
+      },
+      (error) => {
+        console.log(error);
+      },
+    );
   },
   methods: {
     moveModifyArticle() {
       this.$router.replace({
         name: "qnamodify",
-        params: { articleno: this.article.articleno },
+        params: { articleId: this.article.articleId },
       });
-      //   this.$router.push({ path: `/board/modify/${this.article.articleno}` });
+      //   this.$router.push({ path: `/board/modify/${this.article.articleId}` });
     },
     deleteArticle() {
       if (confirm("정말로 삭제?")) {
         this.$router.replace({
           name: "qnadelete",
-          params: { articleno: this.article.articleno },
+          params: { articleId: this.article.articleId },
         });
       }
     },

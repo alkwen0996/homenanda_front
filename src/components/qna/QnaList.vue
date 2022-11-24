@@ -22,6 +22,8 @@
         <li class="page-item"><a class="page-link" href="#">1</a></li>
         <li class="page-item"><a class="page-link" href="#">2</a></li>
         <li class="page-item"><a class="page-link" href="#">3</a></li>
+        <li class="page-item"><a class="page-link" href="#">4</a></li>
+        <li class="page-item"><a class="page-link" href="#">5</a></li>
         <li class="page-item"><a class="page-link" href="#">Next</a></li>
         </ul>
         </nav>
@@ -36,30 +38,13 @@ export default {
   name: "QnaList",
   data() {
     return {
-      articles: [
-        {
-        articleno: 1,
-        subject: "바보",
-        content: "안녕하세요",
-        userId: "정지은",
-        regtime: "11111",
-        hit: "1"
-        },
-        {
-        articleno: 1,
-        subject: "바보",
-        content: "안녕하세요",
-        userId: "정지은",
-        regtime: "11111",
-        hit: "1"
-        }
-      ],
+      articles: [],
       fields: [
-        { key: "articleno", label: "글번호", tdClass: "tdClass" },
+        { key: "articleId", label: "글번호", tdClass: "tdClass" },
         { key: "subject", label: "제목", tdClass: "tdSubject" },
         { key: "content", label: "내용", tdClass: "tdContent"},
         { key: "userId", label: "작성자", tdClass: "tdClass" },
-        { key: "regtime", label: "작성일", tdClass: "tdClass" },
+        { key: "createdDate", label: "작성일", tdClass: "tdClass" },
         { key: "hit", label: "조회수", tdClass: "tdClass" },
       ],
     };
@@ -80,6 +65,8 @@ export default {
       (error) => {
         console.log(error);
       }
+
+  
     );
   },
   methods: {
@@ -89,7 +76,7 @@ export default {
     viewArticle(article) {
       this.$router.push({
         name: "qnadetail",
-        params: { articleno: article.articleno },
+        params: { articleId: article.articleId },
       });
     },
   },
