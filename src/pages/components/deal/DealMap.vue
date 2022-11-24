@@ -83,8 +83,9 @@ import schoolImg from "@/assets/images/school.png";
 import storeImg from "@/assets/images/store.png";
 import subImage from "@/assets/images/subway.png";
 import apartImage from "@/assets/images/apart.png";
+import attentionImage from "@/assets/images/Attention.png";
 import { mapMutations, mapGetters, mapActions } from "vuex";
-
+import axios from "axios";
 import apartApi from "@/api/ApartApi";
 
 const MarkInfo = "MarkInfo";
@@ -125,6 +126,8 @@ export default {
       subMarker: [],
       apartMarker: [],
       apartCurInfo: [],
+      attentionMarker: [],
+      attentionMarkerInfo: [],
     };
   },
   components: {
@@ -152,6 +155,7 @@ export default {
     this.locY = this.getInitLocY;
 
     this.setApartInfo(this.locX, this.locY);
+    this.setAttention();
   },
   mounted() {
     let kakao = window.kakao;
@@ -463,7 +467,8 @@ export default {
               // console.log(parseFloat(data[i].lat));
               // console.log(parseFloat(data[i].lng));
               // if (this.isEmpty(data[i])) continue;
-              tmp.push(new kakao.maps.LatLng(parseFloat(data[i].lat), parseFloat(data[i].lng)));
+
+              tmp.push(new kakao.maps.LatLng(data[i].lat, data[i].lng));
               // console.log(data[i]);
               this.apartCurInfo.push(data[i]);
             }
@@ -571,7 +576,7 @@ export default {
     createApartMarkers() {
       let markerImageSrc = apartImage;
       let kakao = window.kakao;
-      let apartInfo = this.getLocApartInfo;
+      let apartInfo = this.getLocApartInfo.filter((data) => !this.isEmpty(data));
 
       if (apartInfo === null) return;
 
@@ -584,11 +589,46 @@ export default {
 
         this.apartMarker.push(marker);
         this.apartMarker[i].setMap(this.map);
+        // console.log("==========start apart");
+        // console.log(apartInfo[i]);
         // console.log(this.apartCurInfo[i]);
         kakao.maps.event.addListener(marker, "click", () => {
           if (!this.modalView) {
             let url = "?apartCode=" + String(this.apartCurInfo[i].houseCode);
             this.SET_HOUSE_INFO(this.apartCurInfo[i]);
+
+            apartApi.get(url).then(({ data }) => {
+              // console.log(data);
+              this.SET_HOUSE_DEAL(data);
+            });
+            this.modalView = true;
+          } else {
+            this.modalView = false;
+          }
+        });
+      }
+    },
+    createAttentionMarkers() {
+      let markerImageSrc = attentionImage;
+      let kakao = window.kakao;
+      let attentionInfo = this.attentionMarker;
+      for (let i = 0; i < attentionInfo.length; i++) {
+        let imageSize = new kakao.maps.Size(44, 44),
+          imageOptions = {};
+
+        let markerImage = this.createMarkerImage(markerImageSrc, imageSize, imageOptions);
+
+        let marker = new kakao.maps.Marker({
+          position: attentionInfo[i],
+          image: markerImage,
+          zIndex: 5,
+        });
+        marker.setMap(this.map);
+
+        kakao.maps.event.addListener(marker, "click", () => {
+          if (!this.modalView) {
+            let url = "?apartCode=" + String(this.attentionMarkerInfo[i].houseCode);
+            this.SET_HOUSE_INFO(this.attentionMarkerInfo[i]);
 
             apartApi.get(url).then(({ data }) => {
               // console.log(data);
@@ -674,6 +714,7 @@ export default {
     addAtt() {
       let userId = this.checkUserInfo.userId;
       let favoriteArea = { areaCode: this.rightLoc, userId: userId };
+      console.log(favoriteArea);
       this.addAttInfo(favoriteArea);
 
       this.tabView = false;
@@ -723,6 +764,24 @@ export default {
     },
     setApartInfo(lat, lng) {
       this.getApartMarkers(lng, lat);
+    },
+    setAttention() {
+      let kakao = window.kakao;
+      if (this.isEmpty(this.checkUserInfo)) return;
+
+      let userId = this.checkUserInfo.userId;
+
+      axios.get(`http://localhost:8080/users/house/${userId}`).then(({ data }) => {
+        let tmp = [];
+        this.attentionMarkerInfo = [];
+        for (var i = 0; i < data.length; i++) {
+          tmp.push(new kakao.maps.LatLng(data[i].lat, data[i].lng));
+          this.attentionMarkerInfo.push(data[i]);
+        }
+        this.attentionMarker = tmp;
+
+        this.createAttentionMarkers();
+      });
     },
   },
 };
