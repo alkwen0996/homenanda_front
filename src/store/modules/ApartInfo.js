@@ -1,3 +1,4 @@
+import axios from "axios";
 const ApartInfo = {
   namespaced: true,
   state: {
@@ -75,15 +76,54 @@ const ApartInfo = {
       state.houseDeal = deal;
     },
     ADD_ATT_HOUSE(state, house) {
-      state.attHouse.push(house);
+      let exist = false;
+      for (let i = 0; i < state.attHouse.length; i++) {
+        if (state.attHouse[i] == house) {
+          exist = true;
+        }
+      }
+      if (!exist) state.attHouse.push(house);
     },
 
-    SUB_ATT_HOUSE(state, house) {
+    SUB_ATT_HOUSE(state, houseCode) {
       for (let i = 0; i < state.attHouse.length; i++) {
-        if (state.attHouse[i].dealCode == house.dealCode) {
+        if (state.attHouse[i] == houseCode) {
           state.attHouse.splice(i, 1);
         }
       }
+    },
+    SET_ATT_INIT(state) {
+      state.attHouse = [];
+    },
+  },
+  actions: {
+    getAttHouse({ commit }, userId) {
+      axios.get(`http://localhost:8080/users/house/${userId}`).then(({ data }) => {
+        commit("SET_ATT_INIT");
+        for (let i = 0; i < data.length; i++) commit("ADD_ATT_HOUSE", data[i].houseCode);
+      });
+    },
+    ///////////////////////
+    subAttHouse({ commit }, houseCode) {
+      axios
+        .delete(`http://localhost:8080/users/house/${houseCode}`)
+        .then((data) => {
+          commit("SUB_ATT_HOUSE", houseCode);
+          console.log(data);
+        })
+        .catch((e) => console.log(e));
+    },
+    addAttHouse({ commit, state }, favoriteHouse) {
+      for (let i = 0; i < state.attHouse.length; i++) {
+        if (state.attHouse[i] == favoriteHouse.houseCode) return;
+      }
+      axios
+        .post(`http://localhost:8080/users/house`, favoriteHouse)
+        .then((data) => {
+          commit("ADD_ATT_HOUSE", favoriteHouse.houseCode);
+          console.log(data);
+        })
+        .catch((e) => console.log(e));
     },
   },
 };

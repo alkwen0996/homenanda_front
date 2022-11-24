@@ -83,20 +83,22 @@ import schoolImg from "@/assets/images/school.png";
 import storeImg from "@/assets/images/store.png";
 import subImage from "@/assets/images/subway.png";
 import apartImage from "@/assets/images/apart.png";
-import { mapMutations, mapGetters } from "vuex";
+import { mapMutations, mapGetters, mapActions } from "vuex";
 
 import apartApi from "@/api/ApartApi";
 
 const MarkInfo = "MarkInfo";
 const DealMapInit = "DealMapInit";
 const ApartInfo = "ApartInfo";
+const memberStore = "memberStore";
+
 const optionNames = ["hospital", "restaurant", "school", "mart", "sub"];
 const maxPage = 5;
 
 function searchDetailAddrFromCoords(coords, callback) {
   let kakao = window.kakao;
   let geocoder = new kakao.maps.services.Geocoder();
-  geocoder.coord2Address(coords.getLng(), coords.getLat(), callback);
+  geocoder.coord2RegionCode(coords.getLng(), coords.getLat(), callback);
 }
 
 export default {
@@ -137,13 +139,13 @@ export default {
       "getLocSchoolInfo",
       "getLocStoreInfo",
       "getLocSubInfo",
-      "getLocAttLoc",
       "getLocCurLocX",
       "getLocCurLocY",
       "getLocApartInfo",
     ]),
     ...mapGetters(DealMapInit, ["getInitLocX", "getInitLocY"]),
     ...mapGetters(ApartInfo, ["getHouseInfo", "getHouseDeal"]),
+    ...mapGetters(memberStore, ["checkUserInfo"]),
   },
   created() {
     this.locX = this.getInitLocX;
@@ -214,7 +216,6 @@ export default {
       "SET_STORE_INIT",
       "SET_SUB_INFO",
       "SET_SUB_INIT",
-      "ADD_ATT_LOC",
       "SET_CUR_LOCX",
       "SET_CUR_LOCY",
       "SET_APART_INFO",
@@ -222,6 +223,7 @@ export default {
     ]),
 
     ...mapMutations(ApartInfo, ["SET_HOUSE_INFO", "SET_HOUSE_DEAL"]),
+    ...mapActions(MarkInfo, ["addAttInfo"]),
     ///////////////////////다양한 옵션 설정///////////////////////
     allOptionCheck() {
       for (let i = 0; i < optionNames.length; i++) {
@@ -665,14 +667,15 @@ export default {
       searchDetailAddrFromCoords(latLng, (result, status) => {
         if (status === kakao.maps.services.Status.OK) {
           // console.log(result[0]);
-          this.rightLoc.city = result[0].address.region_1depth_name;
-          this.rightLoc.gu = result[0].address.region_2depth_name;
+          this.rightLoc = result[0].code;
         }
       });
     },
     addAtt() {
-      let tmpObj = { city: this.rightLoc.city, gu: this.rightLoc.gu };
-      this.ADD_ATT_LOC(tmpObj);
+      let userId = this.checkUserInfo.userId;
+      let favoriteArea = { areaCode: this.rightLoc, userId: userId };
+      this.addAttInfo(favoriteArea);
+
       this.tabView = false;
       alert("관심지역이 추가되었습니다.");
     },

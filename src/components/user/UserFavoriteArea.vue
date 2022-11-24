@@ -9,28 +9,33 @@
       <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
         <div class="col" v-for="item in attList" :key="item.areaCode">
           <div class="card shadow-sm">
-            <svg
+            <img
               class="bd-placeholder-img card-img-top"
               width="100%"
               height="225"
-              xmlns="http://www.w3.org/2000/svg"
-              role="img"
+              src="img/areaDetail.png"
               aria-label="Placeholder: Thumbnail"
               preserveAspectRatio="xMidYMid slice"
               focusable="false"
-            ></svg>
+            />
 
             <div class="card-body">
               <p class="card-text">{{ item.sidoName }} {{ item.gugunName }}</p>
               <div class="d-flex justify-content-between align-items-center">
                 <div class="btn-group">
                   <button
-                    :lat="item.lat"
-                    :lng="item.lng"
                     type="button"
                     class="btn btn-sm btn-outline-secondary"
+                    @click="moveMap(item)"
                   >
                     지도가기
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    @click="deleteArea(item)"
+                  >
+                    삭제하기
                   </button>
                 </div>
                 <small class="text-muted">9 mins</small>
@@ -44,25 +49,43 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import axios from "axios";
 
+const MarkInfo = "MarkInfo";
 const memberStore = "memberStore";
+const DealMapInit = "DealMapInit";
 export default {
   name: "UserFavoriteArea",
   data() {
     return {
       attList: [],
+      areaImage: "@/assets/images/areaDetail.png",
     };
   },
   created() {
     let userId = this.checkUserInfo.userId;
-    axios.get(`http://localhost:8080/users/area/${userId}`).then((data) => {
+    axios.get(`http://localhost:8080/users/area/${userId}`).then(({ data }) => {
       console.log(data);
+      this.attList = data;
     });
   },
   computed: {
     ...mapGetters(memberStore, ["checkUserInfo"]),
+  },
+  methods: {
+    ...mapMutations(DealMapInit, ["SET_INIT_LOCX", "SET_INIT_LOCY"]),
+    ...mapActions(MarkInfo, ["subAttInfo"]),
+    moveMap(e) {
+      this.SET_INIT_LOCX(e.lat);
+      this.SET_INIT_LOCY(e.lng);
+      this.$router.push("/landing");
+      // console.log(e);
+    },
+    deleteArea(e) {
+      this.subAttInfo(e.areaCode);
+      this.$router.go();
+    },
   },
 };
 </script>
