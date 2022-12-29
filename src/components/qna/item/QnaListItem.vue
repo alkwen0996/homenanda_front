@@ -1,8 +1,8 @@
 <template>
   <b-tr>
-    <b-td>{{ articleno }}</b-td>
+    <b-td>{{ articleId }}</b-td>
     <b-th class="text-left">
-      <router-link :to="{ name: 'qnadetail', params: { articleno: articleno } }">{{ subject }}</router-link>
+      <router-link :to="{ name: 'qnadetail', params: { articleId: articleId } }">{{ subject }}</router-link>
     </b-th>
     <b-td>{{ hit }}</b-td>
     <b-td>{{ userId }}</b-td>
@@ -16,7 +16,7 @@ import moment from "moment";
 export default {
   name: "QnaListItem",
   props: {
-    articleno: Number,
+    articleId: Number,
     userId: String,
     subject: String,
     content: String,

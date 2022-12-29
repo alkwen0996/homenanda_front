@@ -5,7 +5,7 @@
       
       <div class="mb-3">
         <label for="exampleFormControlInput1" class="form-label"><b>제목</b></label>
-        <input type="text" class="form-control form-control-lg" id="exampleFormControlInput1" :v-model="article.subject"
+        <input type="text" class="form-control form-control-lg" id="exampleFormControlInput1" v-model="article.subject"
           required placeholder="제목 입력...">
       </div>
       
@@ -16,8 +16,8 @@
       </div>
       <hr class="my-5">
       
-      <b-button type="submit" variant="primary" class="m-1" v-if="this.type === 'register'">글작성</b-button>
-      <b-button type="submit" variant="primary" class="m-1" v-else>글수정</b-button>
+      <b-button type="submit" variant="dark" class="m-1" v-if="this.type === 'register'">글작성</b-button>
+      <b-button type="submit" variant="dark" class="m-1" v-else>글수정</b-button>
       <b-button type="reset" variant="danger" class="m-1">초기화</b-button>
       </b-form>
     </b-col>
@@ -25,17 +25,22 @@
 </template>
 
 <script>
-import { writeQna, modifyQna, getQna } from "@/api/qna";
+import { modifyQna, getQna } from "@/api/qna";
+import { mapActions, mapState } from "vuex";
+
+const memberStore = "memberStore";
+const qnaStore = "qnaStore";
 
 export default {
   name: "QnaInputItem",
   data() {
     return {
       article: {
-        articleno: 0,
-        userId: "",
-        subject: "",
-        content: "",
+        articleId: 0,
+        userId: null,
+        subject: null,
+        content: null,
+        type: 'qna',
       },
       isuserId: false,
     };
@@ -43,13 +48,16 @@ export default {
   props: {
     type: { type: String },
   },
+  computed: {
+    ...mapState(memberStore, ["userInfo"]),
+  },
   created() {
     if (this.type === "modify") {
-      let param = this.$route.params.articleno;
+      let param = this.$route.params.articleId;
       getQna(
         param,
         ({ data }) => {
-          // this.article.articleno = data.article.articleno;
+          // this.article.articleId = data.article.articleId;
           // this.article.userId = data.article.userId;
           // this.article.subject = data.article.subject;
           // this.article.content = data.article.content;
@@ -63,49 +71,60 @@ export default {
     }
   },
   methods: {
+    ...mapActions(qnaStore, ["writeQna"]),
+
     onSubmit(event) {
       event.preventDefault();
 
+      this.article.userId = this.userInfo.userId;
+      console.log(this.article.userId);
+      console.log(this.article.subject);
+      console.log(this.article.type);
+      console.log(this.type);
+
       let err = true;
       let msg = "";
-      !this.article.userId && ((msg = "작성자 입력해주세요"), (err = false), this.$refs.userId.focus());
-      err && !this.article.subject && ((msg = "제목 입력해주세요"), (err = false), this.$refs.subject.focus());
-      err && !this.article.content && ((msg = "내용 입력해주세요"), (err = false), this.$refs.content.focus());
+      !this.article.userId && ((msg = "작성자 입력해주세요"), (err = false), this.article.userId.focus());
+      err && !this.article.subject && ((msg = "제목 입력해주세요"), (err = false), this.article.subject.focus());
+      err && !this.article.content && ((msg = "내용 입력해주세요"), (err = false), this.article.content.focus());
 
       if (!err) alert(msg);
-      else this.type === "register" ? this.registArticle() : this.modifyArticle();
+      else this.type === "register" ? this.registQna() : this.modifyQna();
     },
     onReset(event) {
       event.preventDefault();
-      this.article.articleno = 0;
       this.article.subject = "";
       this.article.content = "";
+      this.article.type = "qna";
       this.moveList();
     },
-    registArticle() {
+    registQna() {
       let param = {
         userId: this.article.userId,
         subject: this.article.subject,
         content: this.article.content,
+        type: this.article.type,
       };
-      writeQna(
+      this.writeQna(
         param,
         ({ data }) => {
           let msg = "등록 처리시 문제가 발생했습니다.";
-          if (data === "success") {
+          if (data.message === "success") {
             msg = "등록이 완료되었습니다.";
           }
           alert(msg);
           this.moveList();
+          // this.$router.go(-1);
         },
         (error) => {
           console.log(error);
         }
       );
+
     },
     modifyQna() {
       let param = {
-        articleno: this.article.articleno,
+        articleId: this.article.articleId,
         userId: this.article.userId,
         subject: this.article.subject,
         content: this.article.content,
@@ -114,7 +133,7 @@ export default {
         param,
         ({ data }) => {
           let msg = "수정 처리시 문제가 발생했습니다.";
-          if (data === "success") {
+          if (data.message === "success") {
             msg = "수정이 완료되었습니다.";
           }
           alert(msg);
@@ -125,6 +144,8 @@ export default {
           console.log(error);
         }
       );
+
+      this.$router.push({ name: "qnalist" });
     },
     moveList() {
       this.$router.push({ name: "qnalist" });

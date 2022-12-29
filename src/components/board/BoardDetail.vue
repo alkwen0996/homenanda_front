@@ -8,26 +8,33 @@
       <b-col class="text-left">
         <b-button variant="outline-primary" @click="moveList">목록</b-button>
       </b-col>
-      <b-col class="text-right" v-if="userInfo.userId === article.userId">
-        <b-button variant="outline-info" size="sm" @click="moveModifyArticle" class="mr-2">글수정</b-button>
-        <b-button variant="outline-danger" size="sm" @click="deleteArticle">글삭제</b-button>
-      </b-col>
+
     </b-row>
-    <b-row class="mb-1">
-      <b-col>
-        <b-card
-          :header-html="`<h3>${article.articleno}.
-          ${article.subject} [${article.hit}]</h3><div><h6>${article.userId}</div><div>${article.regtime}</h6></div>`"
-          class="mb-2"
-          border-variant="dark"
-          no-body
-        >
-          <b-card-body class="text-left">
-            <div v-html="message"></div>
-          </b-card-body>
-        </b-card>
-      </b-col>
-    </b-row>
+    <hr class="my-5">
+
+    <div class="row">
+      <div class="col">
+
+        <article class="blog-post">
+          <h3 class="blog-post-title">
+            [{{ article.articleId }}] &nbsp; {{ article.subject }}
+          </h3>
+          <p class="blog-post-meta">{{ article.createdDate }}&nbsp; 작성자 : {{ article.userId }}</p>
+          <hr class="my-0">
+          <hr class="my-0">
+          <h4>{{ article.content }}</h4>
+
+        </article>
+
+      </div>
+    </div>
+
+    <hr class="my-5">
+    <b-col class="text-right">
+      <b-button variant="outline-primary" @click="moveModifyArticle" class="mr-2">글수정</b-button>
+      <b-button variant="outline-primary" @click="deleteArticle" class="mr-2">글삭제</b-button>
+    </b-col>
+
   </b-container>
 </template>
 
@@ -53,30 +60,32 @@ export default {
     },
   },
   created() {
-    let param = this.$route.params.articleno;
+    let param = this.$route.params.articleId;
     getArticle(
       param,
       ({ data }) => {
         this.article = data;
+
       },
       (error) => {
         console.log(error);
-      }
+      },
     );
   },
+
   methods: {
     moveModifyArticle() {
       this.$router.replace({
         name: "boardmodify",
-        params: { articleno: this.article.articleno },
+        params: { articleId: this.article.articleId },
       });
-      //   this.$router.push({ path: `/board/modify/${this.article.articleno}` });
+      //   this.$router.push({ path: `/board/modify/${this.article.articleId}` });
     },
     deleteArticle() {
       if (confirm("정말로 삭제?")) {
         this.$router.replace({
           name: "boarddelete",
-          params: { articleno: this.article.articleno },
+          params: { articleId: this.article.articleId },
         });
       }
     },
@@ -92,4 +101,55 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.bd-placeholder-img {
+  font-size: 1.125rem;
+  text-anchor: middle;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+@media (min-width: 768px) {
+  .bd-placeholder-img-lg {
+    font-size: 3.5rem;
+  }
+}
+
+.b-example-divider {
+  height: 3rem;
+  background-color: rgba(0, 0, 0, .1);
+  border: solid rgba(0, 0, 0, .15);
+  border-width: 1px 0;
+  box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+}
+
+.b-example-vr {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 100vh;
+}
+
+.bi {
+  vertical-align: -.125em;
+  fill: currentColor;
+}
+
+.nav-scroller {
+  position: relative;
+  z-index: 2;
+  height: 2.75rem;
+  overflow-y: hidden;
+}
+
+.nav-scroller .nav {
+  display: flex;
+  flex-wrap: nowrap;
+  padding-bottom: 1rem;
+  margin-top: -1px;
+  overflow-x: auto;
+  text-align: center;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+</style>

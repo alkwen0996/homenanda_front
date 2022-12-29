@@ -83,20 +83,23 @@ import schoolImg from "@/assets/images/school.png";
 import storeImg from "@/assets/images/store.png";
 import subImage from "@/assets/images/subway.png";
 import apartImage from "@/assets/images/apart.png";
-import { mapMutations, mapGetters } from "vuex";
-
+import attentionImage from "@/assets/images/Attention.png";
+import { mapMutations, mapGetters, mapActions } from "vuex";
+import axios from "axios";
 import apartApi from "@/api/ApartApi";
 
 const MarkInfo = "MarkInfo";
 const DealMapInit = "DealMapInit";
 const ApartInfo = "ApartInfo";
+const memberStore = "memberStore";
+
 const optionNames = ["hospital", "restaurant", "school", "mart", "sub"];
 const maxPage = 5;
 
 function searchDetailAddrFromCoords(coords, callback) {
   let kakao = window.kakao;
   let geocoder = new kakao.maps.services.Geocoder();
-  geocoder.coord2Address(coords.getLng(), coords.getLat(), callback);
+  geocoder.coord2RegionCode(coords.getLng(), coords.getLat(), callback);
 }
 
 export default {
@@ -123,6 +126,8 @@ export default {
       subMarker: [],
       apartMarker: [],
       apartCurInfo: [],
+      attentionMarker: [],
+      attentionMarkerInfo: [],
     };
   },
   components: {
@@ -137,19 +142,20 @@ export default {
       "getLocSchoolInfo",
       "getLocStoreInfo",
       "getLocSubInfo",
-      "getLocAttLoc",
       "getLocCurLocX",
       "getLocCurLocY",
       "getLocApartInfo",
     ]),
     ...mapGetters(DealMapInit, ["getInitLocX", "getInitLocY"]),
     ...mapGetters(ApartInfo, ["getHouseInfo", "getHouseDeal"]),
+    ...mapGetters(memberStore, ["checkUserInfo"]),
   },
   created() {
     this.locX = this.getInitLocX;
     this.locY = this.getInitLocY;
 
     this.setApartInfo(this.locX, this.locY);
+    this.setAttention();
   },
   mounted() {
     let kakao = window.kakao;
@@ -214,7 +220,6 @@ export default {
       "SET_STORE_INIT",
       "SET_SUB_INFO",
       "SET_SUB_INIT",
-      "ADD_ATT_LOC",
       "SET_CUR_LOCX",
       "SET_CUR_LOCY",
       "SET_APART_INFO",
@@ -222,6 +227,7 @@ export default {
     ]),
 
     ...mapMutations(ApartInfo, ["SET_HOUSE_INFO", "SET_HOUSE_DEAL"]),
+    ...mapActions(MarkInfo, ["addAttInfo"]),
     ///////////////////////다양한 옵션 설정///////////////////////
     allOptionCheck() {
       for (let i = 0; i < optionNames.length; i++) {
@@ -461,7 +467,8 @@ export default {
               // console.log(parseFloat(data[i].lat));
               // console.log(parseFloat(data[i].lng));
               // if (this.isEmpty(data[i])) continue;
-              tmp.push(new kakao.maps.LatLng(parseFloat(data[i].lat), parseFloat(data[i].lng)));
+
+              tmp.push(new kakao.maps.LatLng(data[i].lat, data[i].lng));
               // console.log(data[i]);
               this.apartCurInfo.push(data[i]);
             }
@@ -569,7 +576,7 @@ export default {
     createApartMarkers() {
       let markerImageSrc = apartImage;
       let kakao = window.kakao;
-      let apartInfo = this.getLocApartInfo;
+      let apartInfo = this.getLocApartInfo.filter((data) => !this.isEmpty(data));
 
       if (apartInfo === null) return;
 
@@ -582,11 +589,46 @@ export default {
 
         this.apartMarker.push(marker);
         this.apartMarker[i].setMap(this.map);
+        // console.log("==========start apart");
+        // console.log(apartInfo[i]);
         // console.log(this.apartCurInfo[i]);
         kakao.maps.event.addListener(marker, "click", () => {
           if (!this.modalView) {
             let url = "?apartCode=" + String(this.apartCurInfo[i].houseCode);
             this.SET_HOUSE_INFO(this.apartCurInfo[i]);
+
+            apartApi.get(url).then(({ data }) => {
+              // console.log(data);
+              this.SET_HOUSE_DEAL(data);
+            });
+            this.modalView = true;
+          } else {
+            this.modalView = false;
+          }
+        });
+      }
+    },
+    createAttentionMarkers() {
+      let markerImageSrc = attentionImage;
+      let kakao = window.kakao;
+      let attentionInfo = this.attentionMarker;
+      for (let i = 0; i < attentionInfo.length; i++) {
+        let imageSize = new kakao.maps.Size(44, 44),
+          imageOptions = {};
+
+        let markerImage = this.createMarkerImage(markerImageSrc, imageSize, imageOptions);
+
+        let marker = new kakao.maps.Marker({
+          position: attentionInfo[i],
+          image: markerImage,
+          zIndex: 5,
+        });
+        marker.setMap(this.map);
+
+        kakao.maps.event.addListener(marker, "click", () => {
+          if (!this.modalView) {
+            let url = "?apartCode=" + String(this.attentionMarkerInfo[i].houseCode);
+            this.SET_HOUSE_INFO(this.attentionMarkerInfo[i]);
 
             apartApi.get(url).then(({ data }) => {
               // console.log(data);
@@ -665,14 +707,16 @@ export default {
       searchDetailAddrFromCoords(latLng, (result, status) => {
         if (status === kakao.maps.services.Status.OK) {
           // console.log(result[0]);
-          this.rightLoc.city = result[0].address.region_1depth_name;
-          this.rightLoc.gu = result[0].address.region_2depth_name;
+          this.rightLoc = result[0].code;
         }
       });
     },
     addAtt() {
-      let tmpObj = { city: this.rightLoc.city, gu: this.rightLoc.gu };
-      this.ADD_ATT_LOC(tmpObj);
+      let userId = this.checkUserInfo.userId;
+      let favoriteArea = { areaCode: this.rightLoc, userId: userId };
+      console.log(favoriteArea);
+      this.addAttInfo(favoriteArea);
+
       this.tabView = false;
       alert("관심지역이 추가되었습니다.");
     },
@@ -717,9 +761,30 @@ export default {
       setTimeout(() => marker.setMap(null), 400);
       setTimeout(() => marker.setMap(this.map), 800);
       setTimeout(() => marker.setMap(null), 1200);
+
+      this.allOptionCheck();
+      this.setApartInfo(e.y, e.x);
     },
     setApartInfo(lat, lng) {
       this.getApartMarkers(lng, lat);
+    },
+    setAttention() {
+      let kakao = window.kakao;
+      if (this.isEmpty(this.checkUserInfo)) return;
+
+      let userId = this.checkUserInfo.userId;
+
+      axios.get(`http://localhost:8080/users/house/${userId}`).then(({ data }) => {
+        let tmp = [];
+        this.attentionMarkerInfo = [];
+        for (var i = 0; i < data.length; i++) {
+          tmp.push(new kakao.maps.LatLng(data[i].lat, data[i].lng));
+          this.attentionMarkerInfo.push(data[i]);
+        }
+        this.attentionMarker = tmp;
+
+        this.createAttentionMarkers();
+      });
     },
   },
 };

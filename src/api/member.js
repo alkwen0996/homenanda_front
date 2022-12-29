@@ -26,10 +26,25 @@ async function register(user, success, fail) {
   await api.post(`/users`, JSON.stringify(user)).then(success).catch(fail);
 }
 
+async function findPassword(user, success, fail) {
+  await api.post(`/users/password`, JSON.stringify(user)).then(success).catch(fail);
+}
+
+async function remove(userId, success, fail) {
+  await api.delete(`/users/${userId}`).then(success).catch(fail);
+}
+
+async function updateUser(user, success, fail) {
+  await api.put(`/users`, JSON.stringify(user)).then(success).catch(fail);
+}
+
 export {
   login,
   findById,
   tokenRegeneration,
   logout,
-  register
+  register,
+  findPassword,
+  remove,
+  updateUser
 };

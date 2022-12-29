@@ -11,8 +11,8 @@
       </div>
 
       <div class="modal-footer flex">
-        <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 rounded-0 border-end"><strong>Yes, enable &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong></button>
-        <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 rounded-0" data-bs-dismiss="modal"><strong>No thanks</strong></button>
+        <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 rounded-0 border-end" @click="remove"><strong>Yes, enable &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong></button>
+        <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 rounded-0" data-bs-dismiss="modal" @click="goBack"><strong>No thanks</strong></button>
       </div>
 
     </div>
@@ -24,12 +24,41 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from "vuex";
+
+const memberStore = "memberStore";
+
 export default {
   name: "UserDelete",
+  data() {
+    return {
+      userId: null
+    }
+  },
+  computed: {
+    ...mapGetters(memberStore, ["checkUserInfo", "isLogin", "userInfo"]),
+  },
+  methods: {
+    ...mapActions(memberStore, ["userRemove", "userLogout"]),
+    async remove() {
+      console.log('userId: ' + this.checkUserInfo.userId)
+      await this.userRemove({
+        userId: this.checkUserInfo.userId,
+      });
+
+      this.userLogout(this.checkUserInfo.userId);
+      sessionStorage.removeItem("access-token"); //저장된 토큰 없애기
+      sessionStorage.removeItem("refresh-token"); //저장된 토큰 없애기
+
+      this.$router.push("/");
+    },
+
+    goBack() {
+      this.$router.push("/user/mypage").catch(() => { });
+    },
+  },
 }
 </script>
-
-
 
 <style>
 .bd-placeholder-img {

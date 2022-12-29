@@ -8,26 +8,35 @@
       <b-col class="text-left">
         <b-button variant="outline-primary" @click="moveList">목록</b-button>
       </b-col>
-      <b-col class="text-right" v-if="userInfo.userId === article.userId">
-        <b-button variant="outline-info" size="sm" @click="moveModifyArticle" class="mr-2">글수정</b-button>
-        <b-button variant="outline-danger" size="sm" @click="deleteArticle">글삭제</b-button>
-      </b-col>
+
     </b-row>
-    <b-row class="mb-1">
-      <b-col>
-        <b-card
-          :header-html="`<h3>${article.articleno}.
-          ${article.subject} [${article.hit}]</h3><div><h6>${article.userId}</div><div>${article.regtime}</h6></div>`"
-          class="mb-2"
-          border-variant="dark"
-          no-body
-        >
-          <b-card-body class="text-left">
-            <div v-html="message"></div>
-          </b-card-body>
-        </b-card>
-      </b-col>
-    </b-row>
+    <hr class="my-5">
+
+    <div class="row">
+      <div class="col">
+
+        <article class="blog-post">
+          <h3 class="blog-post-title">
+            [{{ article.articleId }}] &nbsp; {{ article.subject }}
+          </h3>
+          <p class="blog-post-meta">{{ article.createdDate }}&nbsp; 작성자 : {{ article.userId }}</p>
+          <hr class="my-0">
+          <hr class="my-0">
+          <h4>{{ article.content }}</h4>
+
+        </article>
+
+      </div>
+
+
+    </div>
+
+    <hr class="my-5">
+    <b-col class="text-right">
+      <b-button variant="outline-primary" @click="moveModifyArticle" class="mr-2">글수정</b-button>
+      <b-button variant="outline-primary" @click="deleteArticle" class="mr-2">글삭제</b-button>
+    </b-col>
+
   </b-container>
 </template>
 
@@ -53,30 +62,31 @@ export default {
     },
   },
   created() {
-    let param = this.$route.params.articleno;
+    let param = this.$route.params.articleId;
     getQna(
       param,
       ({ data }) => {
         this.article = data;
+
       },
       (error) => {
         console.log(error);
-      }
+      },
     );
   },
   methods: {
     moveModifyArticle() {
       this.$router.replace({
         name: "qnamodify",
-        params: { articleno: this.article.articleno },
+        params: { articleId: this.article.articleId },
       });
-      //   this.$router.push({ path: `/board/modify/${this.article.articleno}` });
+      //   this.$router.push({ path: `/board/modify/${this.article.articleId}` });
     },
     deleteArticle() {
       if (confirm("정말로 삭제?")) {
         this.$router.replace({
           name: "qnadelete",
-          params: { articleno: this.article.articleno },
+          params: { articleId: this.article.articleId },
         });
       }
     },
@@ -92,4 +102,7 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+
+</style>
+

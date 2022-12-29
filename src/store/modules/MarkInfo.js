@@ -1,3 +1,4 @@
+import axios from "axios";
 const MarkInfo = {
   namespaced: true,
   state: {
@@ -80,14 +81,20 @@ const MarkInfo = {
     ADD_ATT_LOC(state, item) {
       let exist = false;
       for (let i = 0; i < state.attLoc.length; i++) {
-        if (state.attLoc[i].city == item.city && state.attLoc[i].gu == item.gu) {
+        if (state.attLoc[i] == item) {
           exist = true;
         }
       }
       if (!exist) state.attLoc.push(item);
     },
-    SUB_ATT_LOC(state, index) {
-      state.attLoc.splice(index, 1);
+    SUB_ATT_LOC(state, areaCode) {
+      for (let i = 0; state.attLoc.length; i++) {
+        if (state.attLoc[i] == areaCode) state.attLoc.splice(i, 1);
+      }
+    },
+
+    SET_ATT_INIT(state) {
+      state.attLoc = [];
     },
     SET_CUR_LOCX(state, x) {
       state.curLocX = x;
@@ -96,7 +103,38 @@ const MarkInfo = {
       state.curLocY = y;
     },
   },
-  actions: {},
+  actions: {
+    getAttInfo({ commit }, userId) {
+      axios.get(`http://localhost:8080/users/area/${userId}`).then(({ data }) => {
+        commit("SET_ATT_INIT");
+        for (let i = 0; i < data.length; i++) commit("ADD_ATT_LOC", data[i].areaCode);
+      });
+    },
+    subAttInfo({ commit }, areaCode) {
+      axios
+        .delete(`http://localhost:8080/users/area/${areaCode}`)
+        .then((data) => {
+          commit("SUB_ATT_LOC", areaCode);
+          console.log(data);
+        })
+        .catch((e) => console.log(e));
+    },
+    addAttInfo({ commit, state }, favoriteArea) {
+      for (let i = 0; i < state.attLoc.length; i++) {
+        if (
+          String(state.attLoc[i]).substring(0, 5) == String(favoriteArea.areaCode).substring(0, 5)
+        )
+          return;
+      }
+      axios
+        .post(`http://localhost:8080/users/area`, favoriteArea)
+        .then((data) => {
+          commit("ADD_ATT_LOC", favoriteArea.areaCode);
+          console.log(data);
+        })
+        .catch((e) => console.log(e));
+    },
+  },
 };
 
 export default MarkInfo;

@@ -5,7 +5,10 @@ import {
   findById,
   tokenRegeneration,
   logout,
-  register
+  register,
+  findPassword,
+  remove,
+  updateUser,
 } from "@/api/member";
 
 const memberStore = {
@@ -39,6 +42,9 @@ const memberStore = {
     SET_IS_DUMMY: (state, dummy) => {
       state.dummy = dummy;
     },
+    SET_IS_VALID_TOKEN: (state, isValidToken) => {
+      state.isValidToken = isValidToken;
+    }
   },
   actions: {
     async userConfirm({
@@ -70,12 +76,15 @@ const memberStore = {
         }
       );
     },
+
     async getUserInfo({
       commit,
       dispatch
     }, token) {
       let decodeToken = jwtDecode(token);
-      // console.log("2. getUserInfo() decodeToken :: ", decodeToken);
+      console.log("3. token: " + token);
+      console.log("2. getUserInfo() decodeToken :: ", decodeToken);
+      console.log("2-1. decodeToken.userid :: ", decodeToken.userId);
       await findById(
         decodeToken.userId,
         ({
@@ -84,7 +93,7 @@ const memberStore = {
           if (data.message === "success") {
             commit("SET_USER_INFO", data.userInfo);
             console.log(data.userInfo);
-            // console.log("3. getUserInfo data >> ", data);
+            console.log("3. getUserInfo data >> ", data);
           } else {
             console.log("유저 정보 없음!!!!");
           }
@@ -96,6 +105,7 @@ const memberStore = {
         }
       );
     },
+
     async tokenRegeneration({
       commit,
       state
@@ -143,6 +153,74 @@ const memberStore = {
               }
             );
           }
+        }
+      );
+    },
+    async userRemove({
+      commit
+    }, userId) {
+      console.log('storage user: ' + userId.userId);
+      await remove(
+        userId.userId,
+        ({
+          data
+        }) => {
+          console.log(data);
+          if (data.message === "success") {
+            console.log("회원탈퇴 성공");
+          } else {
+            console.log("회원탈퇴 실패");
+          }
+        },
+        (error) => {
+          console.log(error);
+          commit("SET_IS_DUMMY", false);
+        }
+      );
+    },
+    async updateUserInfo({
+      commit
+    }, user) {
+      console.log("update: " + user.userId);
+
+      await updateUser(
+        user,
+        ({
+          data
+        }) => {
+          console.log(data);
+          if (data.message === "success") {
+            console.log("유저정보 수정 성공");
+          } else {
+            console.log("유저정보 수정 실패!!!!");
+          }
+        },
+        (error) => {
+          console.log(error);
+          commit("SET_IS_DUMMY", false);
+        }
+      );
+    },
+    async userFindPassword({
+      commit
+    }, user) {
+      console.log(user);
+
+      await findPassword(
+        user,
+        ({
+          data
+        }) => {
+          console.log(data);
+          if (data.message === "success") {
+            console.log("비밀번호 재설정 메일발송");
+          } else {
+            console.log("비밀번호 재설정 메일발송 실패!!!!");
+          }
+        },
+        (error) => {
+          console.log(error);
+          commit("SET_IS_DUMMY", false);
         }
       );
     },
